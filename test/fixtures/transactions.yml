@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  amount: MyString
+  origin_currency: MyString
+  destination_currency: MyString
+  txn_id: MyString
+  status: MyString
+  user: one
+
+two:
+  amount: MyString
+  origin_currency: MyString
+  destination_currency: MyString
+  txn_id: MyString
+  status: MyString
+  user: two
