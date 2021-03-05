@@ -2,6 +2,7 @@ class TransactionsController < ApplicationController
   before_action :logged_in_user
 
   def home
+    @transactions = Transaction.all
   end
 
   def new
@@ -13,10 +14,26 @@ class TransactionsController < ApplicationController
   end
 
   def create
+    exchange_fee = 1.2 #This is the fee that is charged to every customer.
+    amountToKobo = transaction_params[:amount].to_i * exchange_fee * 100
+    paystackObj =  Paystack.new
+    transactions = PaystackTransactions.new(paystackObj)
+    p request.base_url
+    p request.path
+
     @transaction = current_user.transactions.build(transaction_params)
-    if @transaction.save
-      flash[:success] = "transaction has been created!"
-      redirect_to @transaction
+    p @transaction
+    
+    if @transaction.save    
+      result = transactions.initializeTransaction(
+        :reference => SecureRandom.hex,#"bl1bl3l1-44ffd-44ee-REFERENCE-nnjjk",
+        :amount => amountToKobo,
+        :email => current_user.email,
+        :currency => transaction_params[:origin_currency],
+        :callback_url => request.base_url + '/transactions/' + (@transaction.id).to_s
+        )
+      auth_url = result['data']['authorization_url']
+      redirect_to auth_url
     else
       render 'new'
     end
@@ -26,13 +43,44 @@ class TransactionsController < ApplicationController
     @transaction = current_user.transactions.find(params[:id])
   end
 
+  def transfer
+    # TODO COMPLETE THE TRANSFER ACTION
+    
+    paystackObj =  Paystack.new
+    recipient = PaystackRecipients.new(paystackObj)
+    result = recipients.create(
+      :type => "nuban", #Must be nuban
+      :name => "Test Plan",
+      :description => "Bla-bla-bla", 
+      :account_number => 0123456789, #10 digit account number
+      :bank_code => "044", #monthly, yearly, quarterly, weekly etc 
+      :currency => "NGN",
+  
+    )
+
+    	
+	transfer = PaystackTransfers.new(paystackObj)
+	results = transfers.initializeTransfer(
+		:source => "balance", # Must be balance
+		:reason => "Your reason",
+		:amount => 30000, # Amount in kobo
+		:recipient =>  recipient_code, # Unique recipient code
+		)
+
+  end
+
   def update
+    paystackObj =  Paystack.new
+    transactions = PaystackTransactions.new(paystackObj)
+    transaction_reference = request.params[:reference]
+    result = transactions.verify(transaction_reference)
+
     @transaction = current_user.transactions.find(params[:id])
-    if @transaction.update_attributes(transaction_params)
+    if @transaction.update_attributes(:txn_id => result['data']['id'], :status => result['data']['status'].to_s)
       flash[:success] = "transaction updated"
-      redirect_to @transaction
+      redirect_to root_path
     else
-      render 'edit'
+      redirect_back
     end
   end
 
@@ -54,7 +102,7 @@ class TransactionsController < ApplicationController
   private
 
   def transaction_params
-    params.require(:transaction).permit(:name)
+    params.require(:transaction).permit(:amount, :origin_currency, :destination_currency, :txn_id, :status)
   end
 
 end

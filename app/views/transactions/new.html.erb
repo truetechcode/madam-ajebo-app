@@ -1,0 +1,29 @@
+<h1 class='text-center'>Create a new exchange</h1>
+
+<div class="row">
+  <div class="col-md-4 offset-4">
+    <%= form_with(model: @transaction, local: true) do |f| %>
+      <%= render 'shared/transaction_error' %>
+
+      <%= f.label :amount %>
+      <%= f.number_field :amount, class: 'mb-1 form-control' %>
+
+      <%= f.label :origin_currency, "Selling" %>
+      <%= f.select :origin_currency, [["United State Dollar", "USD"]], class: 'mb-1 form-control' %> <br>
+
+      <%= f.label :destination_currency, "Buying" %>
+      <%= f.select :destination_currency, [["Naira", "NGN"]], class: 'mb-1 form-control' %> <br>
+
+      <%= f.label :account_name %>
+      <%= f.text_field :account_name, class: 'mb-1 form-control' %>
+
+      <%= f.label :bank_name %>
+      <%= f.text_field :bank, class: 'mb-1 form-control' %>
+
+      <%= f.label :account_number %>
+      <%= f.number_field :account_number, class: 'mb-1 form-control' %>
+
+      <%= f.submit "Exchange", class: "mt-2 btn btn-primary" %>
+    <% end %>
+  </div>
+</div>
