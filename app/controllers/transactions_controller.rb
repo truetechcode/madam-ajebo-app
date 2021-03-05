@@ -2,7 +2,11 @@ class TransactionsController < ApplicationController
   before_action :logged_in_user
 
   def home
-    @transactions = Transaction.all
+    if current_user.role == 'admin'
+      @transactions = Transaction.all
+    else
+      @transactions = Transaction.where(user_id: current_user.id)
+    end
   end
 
   def new
@@ -45,27 +49,27 @@ class TransactionsController < ApplicationController
 
   def transfer
     # TODO COMPLETE THE TRANSFER ACTION
-    
+
     paystackObj =  Paystack.new
     recipient = PaystackRecipients.new(paystackObj)
-    result = recipients.create(
-      :type => "nuban", #Must be nuban
-      :name => "Test Plan",
-      :description => "Bla-bla-bla", 
-      :account_number => 0123456789, #10 digit account number
-      :bank_code => "044", #monthly, yearly, quarterly, weekly etc 
-      :currency => "NGN",
+    # result = recipients.create(
+    #   :type => "nuban", #Must be nuban
+    #   :name => "Test Plan",
+    #   :description => "Bla-bla-bla", 
+    #   :account_number => 0123456789, #10 digit account number
+    #   :bank_code => "044", #monthly, yearly, quarterly, weekly etc 
+    #   :currency => "NGN",
   
-    )
+    # )
 
     	
 	transfer = PaystackTransfers.new(paystackObj)
-	results = transfers.initializeTransfer(
-		:source => "balance", # Must be balance
-		:reason => "Your reason",
-		:amount => 30000, # Amount in kobo
-		:recipient =>  recipient_code, # Unique recipient code
-		)
+	# results = transfers.initializeTransfer(
+	# 	:source => "balance", # Must be balance
+	# 	:reason => "Your reason",
+	# 	:amount => 30000, # Amount in kobo
+	# 	:recipient =>  recipient_code, # Unique recipient code
+	# 	)
 
   end
 
