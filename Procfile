@@ -1,1 +1,1 @@
-web: rails s & rails db:seed
+web: rails s
